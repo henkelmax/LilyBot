@@ -1,9 +1,17 @@
+FROM openjdk:17-jdk-slim as builder
+
+COPY . .
+
+RUN chmod +x ./gradlew
+
+RUN ./gradlew build
+
 FROM openjdk:17-jdk-slim
 
 RUN mkdir /bot
 RUN mkdir /data
 
-COPY build/libs/LilyBot-*-all.jar /usr/local/lib/LilyBot.jar
+COPY --from=builder build/libs/LilyBot-*-all.jar /usr/local/lib/LilyBot.jar
 
 # Only place env vars below that are fine to be publicised. Private stuff needs to be
 # applied deployment-side.
