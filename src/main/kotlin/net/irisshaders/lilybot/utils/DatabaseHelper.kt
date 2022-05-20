@@ -58,6 +58,17 @@ object DatabaseHelper {
 		collection.deleteOne(ConfigData::guildId eq inputGuildId)
 	}
 
+	suspend fun getThreadMessageData(inputGuildId: Snowflake): ThreadMessageData? {
+		val collection = database.getCollection<ThreadMessageData>()
+		return collection.findOne(ThreadMessageData::guildId eq inputGuildId)
+	}
+
+	suspend fun setThreadMessageData(threadMessageData: ThreadMessageData) {
+		val collection = database.getCollection<ThreadMessageData>()
+		collection.deleteOne(ThreadMessageData::guildId eq threadMessageData.guildId)
+		collection.insertOne(threadMessageData)
+	}
+
 	/**
 	 * Gets the number of points the provided [inputUserId] has in the provided [inputGuildId] from the database.
 	 *
@@ -303,7 +314,7 @@ object DatabaseHelper {
 			val timeSinceLatestMessage = Clock.System.now() - latestMessage.id.timestamp
 			if (timeSinceLatestMessage.inWholeDays > 7) {
 				collection.deleteOne(ThreadData::threadId eq thread.id)
-				deletedThreads = + 1
+				deletedThreads = +1
 			}
 		}
 		databaseLogger.info("Deleted $deletedThreads old threads from the database")
@@ -387,6 +398,18 @@ data class ConfigData(
 	val joinChannel: Snowflake,
 	val supportChannel: Snowflake?,
 	val supportTeam: Snowflake?,
+)
+
+/**
+ * The data for thread messages.
+ *
+ * @param guildId The ID of the guild the config is for
+ * @param message The message
+ */
+@Serializable
+data class ThreadMessageData(
+	val guildId: Snowflake,
+	val message: String
 )
 
 /**

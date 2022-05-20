@@ -9,6 +9,7 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.channel
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalChannel
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalRole
 import com.kotlindiscord.kord.extensions.commands.converters.impl.role
+import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
@@ -18,6 +19,8 @@ import dev.kord.core.behavior.channel.createEmbed
 import kotlinx.datetime.Clock
 import net.irisshaders.lilybot.utils.ConfigData
 import net.irisshaders.lilybot.utils.DatabaseHelper
+import net.irisshaders.lilybot.utils.ThreadMessageData
+import net.irisshaders.lilybot.utils.configPresent
 import net.irisshaders.lilybot.utils.responseEmbedInChannel
 
 /**
@@ -96,6 +99,41 @@ class Config : Extension() {
 				}
 			}
 
+			ephemeralSubCommand(::ThreadMessage) {
+				name = "threadmessage"
+				description = "Set the thread message"
+
+				check { anyGuild() }
+				check { hasPermission(Permission.Administrator) }
+				check { configPresent() }
+
+				action {
+					val threadMessageData = ThreadMessageData(
+						guild!!.id,
+						arguments.message
+					)
+
+					DatabaseHelper.setThreadMessageData(threadMessageData)
+
+					if (DatabaseHelper.getThreadMessageData(guild!!.id)?.guildId == null) {
+						respond { content = "Thread message set for Guild ID: ${guild!!.id}!" }
+					} else {
+						respond { content = "Thread message updated for Guild ID: ${guild!!.id}!" }
+					}
+
+					val config = DatabaseHelper.getConfig(guild!!.id)!!
+					// Log the config being set in the action log
+					val actionLogChannel = guild?.getChannel(config.modActionLog) as GuildMessageChannelBehavior
+					responseEmbedInChannel(
+						actionLogChannel,
+						"Thread message set!",
+						"An administrator has set/updated the thread message for this guild!",
+						null,
+						user.asUser()
+					)
+				}
+			}
+
 			ephemeralSubCommand {
 				name = "clear"
 				description = "Clear the config!"
@@ -167,6 +205,13 @@ class Config : Extension() {
 		val supportChannel by optionalChannel {
 			name = "supportChannel"
 			description = "Your Support Channel"
+		}
+	}
+
+	inner class ThreadMessage : Arguments() {
+		val message by string {
+			name = "threadMessage"
+			description = "The thread message"
 		}
 	}
 }
