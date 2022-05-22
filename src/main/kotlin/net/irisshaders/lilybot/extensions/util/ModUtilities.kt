@@ -8,6 +8,7 @@ import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingColor
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalChannel
+import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
@@ -62,6 +63,7 @@ class ModUtilities : Extension() {
 				try {
 					if (arguments.embed) {
 						targetChannel.createEmbed {
+							title = arguments.title
 							color = arguments.color
 							description = arguments.message
 							if (arguments.timestamp) {
@@ -180,6 +182,12 @@ class ModUtilities : Extension() {
 			name = "embed"
 			description = "If the message should be sent as an embed."
 			defaultValue = false
+		}
+
+		/** The title of the embed. */
+		val title by optionalString {
+			name = "title"
+			description = "The title of the embed to be sent."
 		}
 
 		/** If the embed should have a timestamp. */
