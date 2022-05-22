@@ -81,6 +81,7 @@ class ModUtilities : Extension() {
 				try {
 					if (arguments.embed) {
 						createdMessage = targetChannel.createEmbed {
+							title = arguments.title
 							color = arguments.color
 							description = arguments.message
 							if (arguments.timestamp) {
@@ -365,6 +366,12 @@ class ModUtilities : Extension() {
 			name = "embed"
 			description = "If the message should be sent as an embed."
 			defaultValue = false
+		}
+
+		/** The title of the embed. */
+		val title by optionalString {
+			name = "title"
+			description = "The title of the embed to be sent."
 		}
 
 		/** If the embed should have a timestamp. */
